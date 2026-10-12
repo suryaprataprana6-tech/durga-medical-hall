@@ -1,0 +1,376 @@
+import fs from 'fs';
+
+const existingContent = fs.readFileSync('src/data/mockData.ts', 'utf8');
+
+const shopSettingsMatch = existingContent.match(/export const initialShopSettings: ShopSettings = \{[\s\S]*?\};\n/);
+const prescriptionsMatch = existingContent.match(/export const initialOrders: Order\[\] = \[[\s\S]*?$/);
+
+const code = `import { Category, Medicine, ShopSettings, Order, PrescriptionRequest, CustomerEnquiry, InventoryBatch } from '@/types';
+import verifiedCatalog from './verifiedCatalogue.json';
+
+${shopSettingsMatch[0]}
+const categorySlugToId: Record<string, string> = {
+  'fever-body-pain': 'cat-1',
+  'cough-cold': 'cat-2',
+  'headache-migraine': 'cat-3',
+  'acidity-gas': 'cat-4',
+  'stomach-digestion': 'cat-5',
+  'allergy-care': 'cat-6',
+  'diabetes-care': 'cat-7',
+  'blood-pressure-heart-care': 'cat-8',
+  'thyroid-care': 'cat-9',
+  'vitamin-nutrition': 'cat-10',
+  'immunity-wellness': 'cat-11',
+  'skin-care': 'cat-12',
+  'hair-care': 'cat-13',
+  'eye-care': 'cat-14',
+  'ear-nose-care': 'cat-15',
+  'dental-oral-care': 'cat-16',
+  'baby-care': 'cat-17',
+  'womens-healthcare': 'cat-18',
+  'mens-healthcare': 'cat-19',
+  'pregnancy-mother-care': 'cat-20',
+  'pain-relief': 'cat-21',
+  'orthopedic-care': 'cat-22',
+  'first-aid': 'cat-23',
+  'surgical-products': 'cat-24',
+  'medical-devices': 'cat-25',
+  'ayurvedic-herbal-products': 'cat-26',
+  'personal-care': 'cat-27',
+  'hygiene-products': 'cat-28',
+};
+
+export const initialMedicines: Medicine[] = (verifiedCatalog as Array<{
+  name: string;
+  slug: string;
+  brand: string;
+  genericName: string;
+  composition: string;
+  categorySlug: string;
+  categoryName: string;
+  manufacturer: string;
+  packSize: string;
+  mrp: number;
+  sellingPrice: number;
+  prescriptionRequired: boolean;
+  description: string;
+  dosageGuidelines: string;
+  storageInstructions: string;
+}>).map((item, idx) => ({
+  id: \`med-\${idx + 1}\`,
+  name: item.name,
+  slug: item.slug,
+  brand: item.brand,
+  genericName: item.genericName,
+  composition: item.composition,
+  categoryId: categorySlugToId[item.categorySlug] || 'cat-1',
+  categoryName: item.categoryName,
+  manufacturer: item.manufacturer,
+  packSize: item.packSize,
+  mrp: item.mrp,
+  sellingPrice: item.sellingPrice,
+  stockQuantity: 0,
+  batchNumber: 'CATALOGUE-VERIFIED',
+  expiryDate: '2028-12-31',
+  prescriptionRequired: item.prescriptionRequired,
+  description: item.description,
+  dosageGuidelines: item.dosageGuidelines,
+  storageInstructions: item.storageInstructions,
+  status: 'active',
+  isDemo: true,
+  featured: idx < 10,
+}));
+
+// Pre-calculate accurate product counts
+const categoryCounts: Record<string, number> = {};
+initialMedicines.forEach((m) => {
+  categoryCounts[m.categoryId] = (categoryCounts[m.categoryId] || 0) + 1;
+});
+
+export const initialCategories: Category[] = [
+  {
+    id: 'cat-1',
+    name: 'Fever & Body Pain',
+    slug: 'fever-body-pain',
+    description: 'Antipyretics, analgesic remedies and fever management essentials.',
+    iconName: 'Thermometer',
+    productCount: categoryCounts['cat-1'] || 0,
+    displayOrder: 1,
+    status: 'active',
+  },
+  {
+    id: 'cat-2',
+    name: 'Cough & Cold',
+    slug: 'cough-cold',
+    description: 'Syrups, lozenges, inhalers, and soothing remedies for respiratory relief.',
+    iconName: 'Wind',
+    productCount: categoryCounts['cat-2'] || 0,
+    displayOrder: 2,
+    status: 'active',
+  },
+  {
+    id: 'cat-3',
+    name: 'Headache & Migraine',
+    slug: 'headache-migraine',
+    description: 'Relief formulas, soothing balms, and migraine care options.',
+    iconName: 'Brain',
+    productCount: categoryCounts['cat-3'] || 0,
+    displayOrder: 3,
+    status: 'active',
+  },
+  {
+    id: 'cat-4',
+    name: 'Acidity & Gas',
+    slug: 'acidity-gas',
+    description: 'Antacids, gas-relief tablets, digestive fizz, and acid reflux aids.',
+    iconName: 'Flame',
+    productCount: categoryCounts['cat-4'] || 0,
+    displayOrder: 4,
+    status: 'active',
+  },
+  {
+    id: 'cat-5',
+    name: 'Stomach & Digestion',
+    slug: 'stomach-digestion',
+    description: 'Probiotics, digestive enzymes, anti-diarrheals, and gut health care.',
+    iconName: 'Stomach',
+    productCount: categoryCounts['cat-5'] || 0,
+    displayOrder: 5,
+    status: 'active',
+  },
+  {
+    id: 'cat-6',
+    name: 'Allergy Care',
+    slug: 'allergy-care',
+    description: 'Antihistamines, anti-itch tablets, and non-drowsy allergy remedies.',
+    iconName: 'ShieldAlert',
+    productCount: categoryCounts['cat-6'] || 0,
+    displayOrder: 6,
+    status: 'active',
+  },
+  {
+    id: 'cat-7',
+    name: 'Diabetes Care',
+    slug: 'diabetes-care',
+    description: 'Glucose monitoring strips, lancets, and sugar management essentials.',
+    iconName: 'Activity',
+    productCount: categoryCounts['cat-7'] || 0,
+    displayOrder: 7,
+    status: 'active',
+  },
+  {
+    id: 'cat-8',
+    name: 'Blood Pressure & Heart Care',
+    slug: 'blood-pressure-heart-care',
+    description: 'Cardiac wellness supports, monitoring aids, and blood pressure care.',
+    iconName: 'HeartPulse',
+    productCount: categoryCounts['cat-8'] || 0,
+    displayOrder: 8,
+    status: 'active',
+  },
+  {
+    id: 'cat-9',
+    name: 'Thyroid Care',
+    slug: 'thyroid-care',
+    description: 'Endocrine support, wellness minerals, and thyroid health management.',
+    iconName: 'ActivitySquare',
+    productCount: categoryCounts['cat-9'] || 0,
+    displayOrder: 9,
+    status: 'active',
+  },
+  {
+    id: 'cat-10',
+    name: 'Vitamin & Nutrition',
+    slug: 'vitamin-nutrition',
+    description: 'Multivitamins, calcium, vitamin D3, zinc, and daily energy boosters.',
+    iconName: 'Apple',
+    productCount: categoryCounts['cat-10'] || 0,
+    displayOrder: 10,
+    status: 'active',
+  },
+  {
+    id: 'cat-11',
+    name: 'Immunity & Wellness',
+    slug: 'immunity-wellness',
+    description: 'Chyawanprash, herbal tonics, and natural disease-resistance boosters.',
+    iconName: 'ShieldCheck',
+    productCount: categoryCounts['cat-11'] || 0,
+    displayOrder: 11,
+    status: 'active',
+  },
+  {
+    id: 'cat-12',
+    name: 'Skin Care',
+    slug: 'skin-care',
+    description: 'Dermatological creams, soothing calamine, lotions, and antiseptics.',
+    iconName: 'Sparkles',
+    productCount: categoryCounts['cat-12'] || 0,
+    displayOrder: 12,
+    status: 'active',
+  },
+  {
+    id: 'cat-13',
+    name: 'Hair Care',
+    slug: 'hair-care',
+    description: 'Anti-dandruff solutions, hair vitality oils, and nourishing remedies.',
+    iconName: 'Sparkle',
+    productCount: categoryCounts['cat-13'] || 0,
+    displayOrder: 13,
+    status: 'active',
+  },
+  {
+    id: 'cat-14',
+    name: 'Eye Care',
+    slug: 'eye-care',
+    description: 'Lubricating drops, cooling washes, and irritation relief eye solutions.',
+    iconName: 'Eye',
+    productCount: categoryCounts['cat-14'] || 0,
+    displayOrder: 14,
+    status: 'active',
+  },
+  {
+    id: 'cat-15',
+    name: 'Ear & Nose Care',
+    slug: 'ear-nose-care',
+    description: 'Decongestant sprays, ear wax softeners, and sinus cleansing drops.',
+    iconName: 'Ear',
+    productCount: categoryCounts['cat-15'] || 0,
+    displayOrder: 15,
+    status: 'active',
+  },
+  {
+    id: 'cat-16',
+    name: 'Dental & Oral Care',
+    slug: 'dental-oral-care',
+    description: 'Gum astringents, sensitivity toothpastes, ulcer gels, and mouthwashes.',
+    iconName: 'Smile',
+    productCount: categoryCounts['cat-16'] || 0,
+    displayOrder: 16,
+    status: 'active',
+  },
+  {
+    id: 'cat-17',
+    name: 'Baby Care',
+    slug: 'baby-care',
+    description: 'Baby powders, gentle washes, diaper rash care, and infant essentials.',
+    iconName: 'Baby',
+    productCount: categoryCounts['cat-17'] || 0,
+    displayOrder: 17,
+    status: 'active',
+  },
+  {
+    id: 'cat-18',
+    name: 'Women\\'s Healthcare',
+    slug: 'womens-healthcare',
+    description: 'Sanitary napkins, intimate hygiene washes, and maternal health care.',
+    iconName: 'HeartHandshake',
+    productCount: categoryCounts['cat-18'] || 0,
+    displayOrder: 18,
+    status: 'active',
+  },
+  {
+    id: 'cat-19',
+    name: 'Men\\'s Healthcare',
+    slug: 'mens-healthcare',
+    description: 'Vitality capsules, grooming essentials, and men\\'s wellness tonics.',
+    iconName: 'UserCheck',
+    productCount: categoryCounts['cat-19'] || 0,
+    displayOrder: 19,
+    status: 'active',
+  },
+  {
+    id: 'cat-20',
+    name: 'Pregnancy & Mother Care',
+    slug: 'pregnancy-mother-care',
+    description: 'Pregnancy test cards, prenatal supplements, and stretch mark care.',
+    iconName: 'Flower2',
+    productCount: categoryCounts['cat-20'] || 0,
+    displayOrder: 20,
+    status: 'active',
+  },
+  {
+    id: 'cat-21',
+    name: 'Pain Relief',
+    slug: 'pain-relief',
+    description: 'Topical sprays, heating balms, cooling gels, and muscular pain oils.',
+    iconName: 'Zap',
+    productCount: categoryCounts['cat-21'] || 0,
+    displayOrder: 21,
+    status: 'active',
+  },
+  {
+    id: 'cat-22',
+    name: 'Orthopedic Care',
+    slug: 'orthopedic-care',
+    description: 'Crepe bandages, knee braces, cervical collars, and lumbar support belts.',
+    iconName: 'Crosshair',
+    productCount: categoryCounts['cat-22'] || 0,
+    displayOrder: 22,
+    status: 'active',
+  },
+  {
+    id: 'cat-23',
+    name: 'First Aid',
+    slug: 'first-aid',
+    description: 'Sterile cotton, povidone-iodine, adhesive bandages, and gauze rolls.',
+    iconName: 'PlusSquare',
+    productCount: categoryCounts['cat-23'] || 0,
+    displayOrder: 23,
+    status: 'active',
+  },
+  {
+    id: 'cat-24',
+    name: 'Surgical Products',
+    slug: 'surgical-products',
+    description: 'Surgical tape, disposable gloves, face masks, IV sets, and sterile syringes.',
+    iconName: 'Scissors',
+    productCount: categoryCounts['cat-24'] || 0,
+    displayOrder: 24,
+    status: 'active',
+  },
+  {
+    id: 'cat-25',
+    name: 'Medical Devices',
+    slug: 'medical-devices',
+    description: 'Digital thermometers, pulse oximeters, vaporizers, and nebulizer accessories.',
+    iconName: 'Cpu',
+    productCount: categoryCounts['cat-25'] || 0,
+    displayOrder: 25,
+    status: 'active',
+  },
+  {
+    id: 'cat-26',
+    name: 'Ayurvedic & Herbal Products',
+    slug: 'ayurvedic-herbal-products',
+    description: 'Herbal syrups, classical churnas, pure honey, and ayurvedic joint oils.',
+    iconName: 'Leaf',
+    productCount: categoryCounts['cat-26'] || 0,
+    displayOrder: 26,
+    status: 'active',
+  },
+  {
+    id: 'cat-27',
+    name: 'Personal Care',
+    slug: 'personal-care',
+    description: 'Daily body lotions, moisturizers, deodorants, and petroleum jelly.',
+    iconName: 'Sun',
+    productCount: categoryCounts['cat-27'] || 0,
+    displayOrder: 27,
+    status: 'active',
+  },
+  {
+    id: 'cat-28',
+    name: 'Hygiene Products',
+    slug: 'hygiene-products',
+    description: 'Antiseptic floor washes, surface sanitizers, hand rubs, and toilet care.',
+    iconName: 'Droplets',
+    productCount: categoryCounts['cat-28'] || 0,
+    displayOrder: 28,
+    status: 'active',
+  },
+];
+
+${prescriptionsMatch[0]}`;
+
+fs.writeFileSync('src/data/mockData.ts', code, 'utf8');
+console.log('Clean mockData.ts successfully created!');
